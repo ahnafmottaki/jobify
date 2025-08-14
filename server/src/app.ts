@@ -1,5 +1,15 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
+import morgan from "morgan";
+
 const app = express();
+
+// morgan middleware use in development mode
+if (process.env.NODE_ENV === "development") {
+  console.log("morgan middleware added");
+  app.use(morgan("dev"));
+}
 
 app.use(express.json());
 
