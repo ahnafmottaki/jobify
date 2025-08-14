@@ -26,9 +26,7 @@ const DashboardLayout = () => {
   const user = { name: "john" };
   const [showSidebar, setShowSidebar] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(false);
-  const toggleDarkTheme = () => {
-    console.log("toggle dark theme");
-  };
+  const toggleDarkTheme = () => {};
   const toggleSideBar = () => {
     setShowSidebar((prev) => !prev);
   };
