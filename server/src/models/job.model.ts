@@ -1,19 +1,17 @@
-import mongoose from "mongoose";
+import mongoose, { type InferSchemaType } from "mongoose";
 
 const JobSchema = new mongoose.Schema(
   {
     company: {
       type: String,
-      required: true,
     },
     position: {
       type: String,
-      required: true,
     },
     jobStatus: {
       type: String,
-      required: true,
       enum: ["interview", "declined", "pending"],
+      default: "interview",
     },
     jobType: {
       type: String,
@@ -27,5 +25,7 @@ const JobSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+export type JobModel = InferSchemaType<typeof JobSchema>;
 
 export default mongoose.model("Job", JobSchema);

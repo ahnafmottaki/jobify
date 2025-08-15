@@ -1,45 +1,41 @@
-import { type Request, type Response } from "express";
+import { NextFunction, type Request, type Response } from "express";
 import type { JobProp, CreateJobBody } from "../types/job";
 import { nanoid } from "nanoid";
+import Job, { type JobModel } from "../models/job.model";
+import asyncHandler from "../utils/asyncHandler";
+import AppError from "../utils/AppError";
+import type { ResProp, ReqBodyProp, ResponseProp } from "../types/reqResTypes";
 
 let jobs: JobProp[] = [
   { id: nanoid(), company: "apple", position: "frontend" },
   { id: nanoid(), company: "facebook", position: "backend" },
 ];
 
-type ResErrorProp = {
-  success: false;
-  message: string;
-};
-type ResSuccessProp<K, T extends string> = {
-  success: true;
-} & { [prop in T]: K };
-
-type ResProp<K, T extends string> = ResErrorProp | ResSuccessProp<K, T>;
-
 export const getAllJobs = (
-  req: Request<{}, ResProp<JobProp[], "jobs">>,
-  res: Response
+  req: Request,
+  res: Response<ResProp<JobProp[], "jobs">>
 ) => {
   res.status(200).json({ success: true, jobs });
 };
 
-export const createJob = (
-  req: Request<{}, ResProp<JobProp, "job">, Partial<CreateJobBody>>,
-  res: Response
-) => {
-  if (!req.body?.company || !req.body?.position) {
-    return res.status(400).json({
-      success: false,
-      message: "please provide company and position",
-    });
+export const createJob = asyncHandler(
+  async (
+    req: ReqBodyProp<CreateJobBody>,
+    res: ResponseProp<JobModel, "job">,
+    next: NextFunction
+  ) => {
+    if (!req.body?.company || !req.body?.position) {
+      return res.status(400).json({
+        success: false,
+        message: "please provide company and position",
+      });
+    }
+    const { company, position } = req.body;
+    return next(new AppError(446, "custom message"));
+    const job: JobModel = await Job.create("something");
+    res.status(201).json({ success: true, job });
   }
-  const { company, position } = req.body;
-  const id = nanoid();
-  const job: JobProp = { id, company, position };
-  jobs.push(job);
-  res.status(201).json({ success: true, job });
-};
+);
 
 export const getJob = (
   req: Request<{ id: string }, ResProp<JobProp, "job">>,
