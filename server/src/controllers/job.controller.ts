@@ -4,52 +4,53 @@ import { nanoid } from "nanoid";
 import Job, { type JobModel } from "../models/job.model";
 import asyncHandler from "../utils/asyncHandler";
 import AppError from "../utils/AppError";
-import type { ResProp, ReqBodyProp, ResponseProp } from "../types/reqResTypes";
+import type {
+  ResProp,
+  ReqBodyProp,
+  ResSuccessProp,
+} from "../types/reqResTypes";
 
 let jobs: JobProp[] = [
   { id: nanoid(), company: "apple", position: "frontend" },
   { id: nanoid(), company: "facebook", position: "backend" },
 ];
 
-export const getAllJobs = (
-  req: Request,
-  res: Response<ResProp<JobProp[], "jobs">>
-) => {
+export const getAllJobs = asyncHandler<
+  any,
+  any,
+  ResSuccessProp<JobModel[], "jobs">
+>(async (req, res, next) => {
+  const jobs: JobModel[] = await Job.find({});
   res.status(200).json({ success: true, jobs });
-};
+});
 
-export const createJob = asyncHandler(
-  async (
-    req: ReqBodyProp<CreateJobBody>,
-    res: ResponseProp<JobModel, "job">,
-    next: NextFunction
-  ) => {
-    if (!req.body?.company || !req.body?.position) {
-      return res.status(400).json({
-        success: false,
-        message: "please provide company and position",
-      });
-    }
-    const { company, position } = req.body;
-    return next(new AppError(446, "custom message"));
-    const job: JobModel = await Job.create("something");
-    res.status(201).json({ success: true, job });
+export const createJob = asyncHandler<
+  any,
+  ResSuccessProp<JobModel, "job">,
+  Partial<CreateJobBody>
+>(async (req, res, next) => {
+  if (!req.body?.company || !req.body?.position) {
+    return next(new AppError(404, "company and position required"));
   }
-);
+  const { company, position } = req.body;
+  const job: JobModel = await Job.create({ company, position });
+  res.status(201).json({ success: true, job });
+});
 
-export const getJob = (
-  req: Request<{ id: string }, ResProp<JobProp, "job">>,
-  res: Response
-) => {
+export const getJob = asyncHandler<
+  { id: string },
+  ResSuccessProp<JobModel, "job">
+>(async (req, res, next) => {
   const { id } = req.params;
-  const job = jobs.find((job) => job.id === id);
-  if (!id || !job) {
-    return res
-      .status(404)
-      .json({ success: false, message: `no job with id ${id}` });
+  if (!id) {
+    return next(new AppError(404, "Job id required!"));
+  }
+  const job = await Job.findById(id);
+  if (!job) {
+    return next(new AppError(404, `no job with id ${id}`));
   }
   res.status(200).json({ success: true, job });
-};
+});
 
 export const updateJob = (
   req: Request<{ id: string }, ResProp<JobProp, "job">>,
@@ -75,19 +76,17 @@ export const updateJob = (
   res.status(200).json({ success: true, job });
 };
 
-export const deleteJob = (
-  req: Request<{ id: string }, ResProp<string, "message">>,
-  res: Response
-) => {
+export const deleteJob = asyncHandler<
+  { id: string },
+  ResSuccessProp<string, "message">
+>(async (req, res, next) => {
   const { id } = req.params;
-  const job = jobs.find((job) => job.id === id);
-  if (!job || !id) {
-    return res
-      .status(404)
-      .json({ success: false, message: `no job with id ${id}` });
+  if (!id) {
+    return next(new AppError(404, "Job id required!"));
   }
-  const newJobs = jobs.filter((job) => job.id !== id);
-  jobs = newJobs;
-
+  const removeJob = await Job.findByIdAndDelete(id);
+  if (!removeJob) {
+    return next(new AppError(404, `no job with id ${id}`));
+  }
   res.status(200).json({ success: true, message: "job deleted" });
-};
+});
