@@ -1,9 +1,10 @@
 import dotenv from "dotenv";
 dotenv.config();
-import express, { type NextFunction, type Request, Response } from "express";
+import express from "express";
 import morgan from "morgan";
 import JobRouter from "./routes/job.route";
 import errorMiddleware from "./middlewares/errorMiddleware";
+import notFoundMiddleware from "./middlewares/notFoundMiddleware";
 
 const app = express();
 
@@ -18,12 +19,7 @@ app.use(express.json());
 app.use("/api/v1/jobs", JobRouter);
 
 // not found middleware
-app.use((req, res) => {
-  res.status(400).json({
-    success: false,
-    message: "Page not found",
-  });
-});
+app.use(notFoundMiddleware);
 
 // global error middleware
 app.use(errorMiddleware);

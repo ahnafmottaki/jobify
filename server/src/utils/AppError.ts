@@ -1,3 +1,5 @@
+import { StatusCodes } from "http-status-codes";
+
 class AppError extends Error {
   status: number;
   isOperational = true;
@@ -7,5 +9,4 @@ class AppError extends Error {
     Error.captureStackTrace(this, this.constructor);
   }
 }
-
 export default AppError;

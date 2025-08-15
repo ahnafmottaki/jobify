@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import AppError from "../utils/AppError";
+import { StatusCodes } from "http-status-codes";
 
 const isAppError = (errorObj: Error | AppError): errorObj is AppError => {
   return "isOperational" in errorObj;
@@ -11,8 +12,8 @@ const errorMiddleware = (
   res: Response,
   next: NextFunction
 ) => {
-  let statusCode = 500;
-  let message = "Something went wrong";
+  let statusCode: number = StatusCodes.INTERNAL_SERVER_ERROR;
+  let message: string = "Something went wrong";
   if (isAppError(error)) {
     statusCode = error.status;
     message = error.message;
