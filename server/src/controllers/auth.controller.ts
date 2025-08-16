@@ -44,3 +44,17 @@ export const login = asyncHandler<
   });
   res.status(StatusCodes.OK).json({ success: true, message: "user logged in" });
 });
+
+export const logout = asyncHandler<any, ResSuccessProp<string, "message">>(
+  (req, res, next) => {
+    res.cookie("token", "logout", {
+      httpOnly: true,
+      expires: new Date(Date.now()),
+      secure: process.env.NODE_ENV === "production",
+    });
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "user logged out",
+    });
+  }
+);
