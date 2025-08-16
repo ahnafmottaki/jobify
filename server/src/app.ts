@@ -4,6 +4,7 @@ import express from "express";
 import morgan from "morgan";
 import authRouter from "./routes/auth.route";
 import JobRouter from "./routes/job.route";
+import userRouter from "./routes/user.route";
 import errorMiddleware from "./middlewares/errorMiddleware";
 import notFoundMiddleware from "./middlewares/notFoundMiddleware";
 import { authenticateUser } from "./middlewares/authMiddleware";
@@ -21,6 +22,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/users", authenticateUser, userRouter);
 app.use("/api/v1/jobs", authenticateUser, JobRouter);
 
 // not found middleware
