@@ -1,12 +1,43 @@
 import { Logo } from "../components";
 import Wrapper from "../assets/wrappers/RegisterAndLoginPage";
-import { Link } from "react-router";
+import { toast } from "react-toastify";
+import {
+  Form,
+  Link,
+  redirect,
+  useNavigation,
+  type ActionFunctionArgs,
+} from "react-router";
 import { FormRow } from "../components";
+import customFetch from "../utils/customFetch";
+import { isAxiosError } from "axios";
+import { type ErrorResponse } from "../types/axiosTypes";
+
+export const action = async ({ request }: ActionFunctionArgs) => {
+  const formData = await request.formData();
+  const data = Object.fromEntries(formData);
+  try {
+    await customFetch.post("/auth/register", data);
+    toast.success("Registration successful");
+    return redirect("/login");
+  } catch (error) {
+    if (isAxiosError<ErrorResponse>(error)) {
+      const responseData = error.response?.data;
+      if (responseData) {
+        toast.error(responseData.errors[0] || "Something went wrong");
+      }
+    }
+
+    return error;
+  }
+};
 
 const Register = () => {
+  const navigation = useNavigation();
+  const isSubmitting = navigation.state === "submitting";
   return (
     <Wrapper>
-      <form className="form">
+      <Form method="post" className="form">
         <Logo />
         <h4>Register</h4>
 
@@ -38,11 +69,11 @@ const Register = () => {
           type="password"
           name="password"
           labelText="Password"
-          defaultValue={"3a@ahf"}
+          defaultValue={"admin123"}
         />
 
-        <button type="submit" className="btn btn-block">
-          submit
+        <button disabled={isSubmitting} type="submit" className="btn btn-block">
+          {isSubmitting ? "Submitting..." : "submit"}
         </button>
         <p>
           Already a member?
@@ -50,7 +81,7 @@ const Register = () => {
             Login
           </Link>
         </p>
-      </form>
+      </Form>
     </Wrapper>
   );
 };
