@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import express, { NextFunction, Request, Response } from "express";
 import morgan from "morgan";
+import authRouter from "./routes/auth.route";
 import JobRouter from "./routes/job.route";
 import errorMiddleware from "./middlewares/errorMiddleware";
 import notFoundMiddleware from "./middlewares/notFoundMiddleware";
@@ -16,6 +17,7 @@ if (process.env.NODE_ENV === "development") {
 
 app.use(express.json());
 
+app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/jobs", JobRouter);
 
 // not found middleware

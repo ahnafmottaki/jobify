@@ -1,9 +1,12 @@
-import type { CreateJobBody } from "../types/job";
 import Job, { type JobModel } from "../models/job.model";
 import asyncHandler from "../utils/asyncHandler";
 import AppError from "../utils/AppError";
 import type { ResSuccessProp } from "../types/reqResTypes";
 import { StatusCodes } from "http-status-codes";
+
+type ParamIdProp = {
+  id: string;
+};
 
 export const getAllJobs = asyncHandler<
   any,
@@ -17,7 +20,7 @@ export const getAllJobs = asyncHandler<
 export const createJob = asyncHandler<
   any,
   ResSuccessProp<JobModel, "job">,
-  Partial<CreateJobBody>
+  Partial<JobModel>
 >(async (req, res, next) => {
   if (!req.body?.company || !req.body?.position) {
     return next(
@@ -30,52 +33,28 @@ export const createJob = asyncHandler<
 });
 
 export const getJob = asyncHandler<
-  { id?: string },
+  ParamIdProp,
   ResSuccessProp<JobModel, "job">
 >(async (req, res, next) => {
-  const { id } = req.params;
-  if (!id) {
-    return next(new AppError(StatusCodes.NOT_FOUND, "Job id required!"));
-  }
-  const job = await Job.findById(id);
-  if (!job) {
-    return next(new AppError(StatusCodes.NOT_FOUND, `no job with id ${id}`));
-  }
+  const job = (await Job.findById(req.params.id))!;
   res.status(StatusCodes.OK).json({ success: true, job });
 });
 
 export const updateJob = asyncHandler<
-  { id?: string },
+  ParamIdProp,
   ResSuccessProp<JobModel, "job">,
-  Partial<CreateJobBody>
+  Partial<JobModel>
 >(async (req, res, next) => {
-  if (!req.body?.company || !req.body?.position || !req.params.id) {
-    return next(new AppError(404, "please provide company and position"));
-  }
-  const { company, position } = req.body;
-  const { id } = req.params;
-  const updateJob = await Job.findByIdAndUpdate(
-    id,
-    { company, position },
-    { new: true }
-  );
-  if (!updateJob) {
-    return next(new AppError(StatusCodes.NOT_FOUND, `no job with id ${id}`));
-  }
-  res.status(StatusCodes.OK).json({ success: true, job: updateJob });
+  const updateJob = await Job.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+  });
+  res.status(StatusCodes.OK).json({ success: true, job: updateJob! });
 });
 
 export const deleteJob = asyncHandler<
-  { id?: string },
+  ParamIdProp,
   ResSuccessProp<string, "message">
 >(async (req, res, next) => {
-  const { id } = req.params;
-  if (!id) {
-    return next(new AppError(StatusCodes.NOT_FOUND, "Job id required!"));
-  }
-  const removeJob = await Job.findByIdAndDelete(id);
-  if (!removeJob) {
-    return next(new AppError(StatusCodes.NOT_FOUND, `no job with id ${id}`));
-  }
+  await Job.findByIdAndDelete(req.params.id);
   res.status(StatusCodes.OK).json({ success: true, message: "job deleted" });
 });
