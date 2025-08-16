@@ -4,6 +4,7 @@ import User, { type UserProp } from "../models/user.model";
 import { ResSuccessProp } from "../types/reqResTypes";
 import { comparePassword, hashPassword } from "../utils/passwordUtils";
 import AppError from "../utils/AppError";
+import { createJWT } from "../utils/tokenUtils";
 
 export const register = asyncHandler<
   any,
@@ -33,7 +34,7 @@ export const login = asyncHandler<any, any, LoginBody>(
         new AppError(StatusCodes.UNAUTHORIZED, "invalid credentials")
       );
     }
-
-    res.send("login");
+    const token = createJWT({ userId: user.id, role: user.role });
+    res.json({ token: token });
   }
 );
