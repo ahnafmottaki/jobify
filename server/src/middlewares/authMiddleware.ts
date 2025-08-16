@@ -26,3 +26,17 @@ export const authenticateUser = (
     );
   }
 };
+
+export const authorizePermissions = (...roles: string[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError(
+          StatusCodes.UNAUTHORIZED,
+          "Unauthorize to access this route"
+        )
+      );
+    }
+    next();
+  };
+};

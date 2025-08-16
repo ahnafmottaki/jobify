@@ -9,6 +9,7 @@ import errorMiddleware from "./middlewares/errorMiddleware";
 import notFoundMiddleware from "./middlewares/notFoundMiddleware";
 import { authenticateUser } from "./middlewares/authMiddleware";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
 const app = express();
 
@@ -17,7 +18,12 @@ if (process.env.NODE_ENV === "development") {
   console.log("morgan middleware added");
   app.use(morgan("dev"));
 }
-
+app.use(
+  cors({
+    origin: [process.env.FRONTEND_ORIGIN as string],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 

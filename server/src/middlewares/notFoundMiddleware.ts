@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { getReasonPhrase, StatusCodes } from "http-status-codes";
 
 interface ResProp {
-  success: true;
+  success: false;
   message: string;
 }
 const notFoundMiddleware = (
@@ -10,7 +10,7 @@ const notFoundMiddleware = (
   res: Response<ResProp>
 ) => {
   res.status(StatusCodes.NOT_FOUND).json({
-    success: true,
+    success: false,
     message: getReasonPhrase(StatusCodes.NOT_FOUND),
   });
 };

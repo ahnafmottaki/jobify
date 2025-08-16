@@ -22,5 +22,10 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 type UserProp = InferSchemaType<typeof UserSchema>;
+UserSchema.methods.toJSON = function () {
+  let obj = this.toObject();
+  delete obj.password;
+  return obj;
+};
 export default mongoose.model("User", UserSchema);
 export { UserProp };

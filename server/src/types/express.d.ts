@@ -2,7 +2,7 @@ import "express"; // 👈 must import, so TS knows which module we’re extendin
 
 declare module "express-serve-static-core" {
   interface Request {
-    user?: {
+    user: {
       userId: string;
       role: string;
     };

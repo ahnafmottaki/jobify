@@ -12,6 +12,10 @@ import Job from "../models/job.model";
 import User from "../models/user.model";
 import { error } from "console";
 
+type TypedReq = Request & {
+  user: { userId: string; role: string };
+};
+
 const withValidationErrors = (
   validateValues: ValidationChain[]
 ): RequestHandler[] => {
@@ -52,9 +56,7 @@ export const validateJobInput = withValidationErrors([
 
 export const validateIdParam = withValidationErrors([
   param("id").custom(async (value, { req }) => {
-    const typedReq = req as Request & {
-      user: { userId: string; role: string };
-    };
+    const typedReq = req as TypedReq;
     const isValidId = mongoose.Types.ObjectId.isValid(value);
     if (!isValidId) {
       throw new Error("invalid mongodb id");
@@ -103,4 +105,24 @@ export const validateLoginInput = withValidationErrors([
     .isEmail()
     .withMessage("invalid email format"),
   body("password").trim().notEmpty().withMessage("password is required"),
+]);
+
+export const validateUpdateUserInput = withValidationErrors([
+  body("name").trim().notEmpty().withMessage("name is required"),
+  body("email")
+    .trim()
+    .notEmpty()
+    .withMessage("email is required")
+    .isEmail()
+    .withMessage("invalid email format")
+    .custom(async (value: string, { req }) => {
+      const typedReq = req as TypedReq;
+      const user = await User.findOne({ email: value });
+      if (user && user._id.toString() !== typedReq.user.userId) {
+        console.log("found user in database", user);
+        throw new Error("Email already exists");
+      }
+    }),
+  body("location").trim().notEmpty().withMessage("location is required"),
+  body("lastName").trim().notEmpty().withMessage("lastName is required"),
 ]);
