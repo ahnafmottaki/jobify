@@ -1,10 +1,10 @@
-import mongoose from "mongoose";
+import mongoose, { InferSchemaType } from "mongoose";
 
 const UserSchema = new mongoose.Schema(
   {
-    name: String,
-    email: String,
-    password: String,
+    name: { type: String, required: true },
+    email: { type: String, required: true },
+    password: { type: String, required: true },
     lastName: {
       type: String,
       default: "lastName",
@@ -21,5 +21,6 @@ const UserSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
+type UserProp = InferSchemaType<typeof UserSchema>;
 export default mongoose.model("User", UserSchema);
+export { UserProp };

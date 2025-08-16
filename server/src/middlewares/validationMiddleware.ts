@@ -5,10 +5,11 @@ import {
   ValidationChain,
   validationResult,
 } from "express-validator";
-import { getReasonPhrase, StatusCodes } from "http-status-codes";
+import { StatusCodes } from "http-status-codes";
 import { JOB_STATUS, JOB_TYPE } from "../utils/constants";
 import mongoose from "mongoose";
 import Job from "../models/job.model";
+import User, { UserProp } from "../models/user.model";
 
 const withValidationErrors = (
   validateValues: ValidationChain[]
@@ -58,4 +59,29 @@ export const validateIdParam = withValidationErrors([
       return Promise.reject("no job found with this id " + value);
     }
   }),
+]);
+
+export const validateRegisterInput = withValidationErrors([
+  body("name").trim().notEmpty().withMessage("name is required"),
+  body("email")
+    .trim()
+    .notEmpty()
+    .withMessage("email is required")
+    .isEmail()
+    .withMessage("invalid email format")
+    .custom(async (value: string) => {
+      const user = await User.findOne({ email: value });
+      if (user) {
+        console.log("found user in database", user);
+        return Promise.reject("Email already exists");
+      }
+    }),
+  body("password")
+    .trim()
+    .notEmpty()
+    .withMessage("password is required")
+    .isLength({ min: 8 })
+    .withMessage("password must be at least 8 characters long"),
+  body("location").trim().notEmpty().withMessage("location is required"),
+  body("lastName").trim().notEmpty().withMessage("lastName is required"),
 ]);
