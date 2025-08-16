@@ -12,7 +12,6 @@ import {
 } from "../middlewares/validationMiddleware";
 
 const router = Router();
-
 router.route("/").get(getAllJobs).post(validateJobInput, createJob);
 router
   .route("/:id")

@@ -1,4 +1,4 @@
-import asyncHandler from "../utils/asyncHandler";
+import { asyncHandler } from "../utils/asyncHandler";
 import { StatusCodes } from "http-status-codes";
 import User, { type UserProp } from "../models/user.model";
 import { ResSuccessProp } from "../types/reqResTypes";
@@ -24,17 +24,23 @@ export const register = asyncHandler<
 });
 
 type LoginBody = { email: string; password: string };
-export const login = asyncHandler<any, any, LoginBody>(
-  async (req, res, next) => {
-    const user = await User.findOne({ email: req.body.email });
-    const isValidUser =
-      user && (await comparePassword(req.body.password, user.password));
-    if (!isValidUser) {
-      return next(
-        new AppError(StatusCodes.UNAUTHORIZED, "invalid credentials")
-      );
-    }
-    const token = createJWT({ userId: user.id, role: user.role });
-    res.json({ token: token });
+export const login = asyncHandler<
+  any,
+  ResSuccessProp<string, "message">,
+  LoginBody
+>(async (req, res, next) => {
+  const user = await User.findOne({ email: req.body.email });
+  const isValidUser =
+    user && (await comparePassword(req.body.password, user.password));
+  if (!isValidUser) {
+    return next(new AppError(StatusCodes.UNAUTHORIZED, "invalid credentials"));
   }
-);
+  const token = createJWT({ userId: user._id.toString(), role: user.role });
+  const oneDay = 24 * 60 * 60 * 1000;
+  res.cookie("token", token, {
+    httpOnly: true,
+    expires: new Date(Date.now() + oneDay),
+    secure: process.env.NODE_ENV === "production",
+  });
+  res.status(StatusCodes.OK).json({ success: true, message: "user logged in" });
+});

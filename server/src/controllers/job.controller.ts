@@ -1,8 +1,8 @@
 import Job, { type JobModel } from "../models/job.model";
-import asyncHandler from "../utils/asyncHandler";
-import AppError from "../utils/AppError";
+import { asyncHandler } from "../utils/asyncHandler";
 import type { ResSuccessProp } from "../types/reqResTypes";
 import { StatusCodes } from "http-status-codes";
+import { Types } from "mongoose";
 
 type ParamIdProp = {
   id: string;
@@ -13,22 +13,17 @@ export const getAllJobs = asyncHandler<
   any,
   ResSuccessProp<JobModel[], "jobs">
 >(async (req, res, next) => {
-  const jobs: JobModel[] = await Job.find({});
+  const jobs: JobModel[] = await Job.find({ createdBy: req.user?.userId });
   res.status(StatusCodes.OK).json({ success: true, jobs });
 });
 
 export const createJob = asyncHandler<
   any,
   ResSuccessProp<JobModel, "job">,
-  Partial<JobModel>
+  JobModel
 >(async (req, res, next) => {
-  if (!req.body?.company || !req.body?.position) {
-    return next(
-      new AppError(StatusCodes.NOT_FOUND, "company and position required")
-    );
-  }
-  const { company, position } = req.body;
-  const job: JobModel = await Job.create({ company, position });
+  req.body.createdBy = new Types.ObjectId(req.user?.userId);
+  const job = await Job.create(req.body);
   res.status(StatusCodes.CREATED).json({ success: true, job });
 });
 

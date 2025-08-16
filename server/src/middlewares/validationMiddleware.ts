@@ -9,7 +9,8 @@ import { StatusCodes } from "http-status-codes";
 import { JOB_STATUS, JOB_TYPE } from "../utils/constants";
 import mongoose from "mongoose";
 import Job from "../models/job.model";
-import User, { UserProp } from "../models/user.model";
+import User from "../models/user.model";
+import { error } from "console";
 
 const withValidationErrors = (
   validateValues: ValidationChain[]
@@ -20,12 +21,13 @@ const withValidationErrors = (
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         const errorMessages = errors.array().map((error) => error.msg);
+        const firstErrorMessage = errorMessages[0];
+        const isString = typeof firstErrorMessage === "string";
         let statusCode: number = StatusCodes.BAD_REQUEST;
-        if (
-          typeof errorMessages[0] === "string" &&
-          errorMessages[0].startsWith("no job")
-        ) {
+        if (isString && firstErrorMessage.startsWith("no job")) {
           statusCode = StatusCodes.NOT_FOUND;
+        } else if (isString && firstErrorMessage.startsWith("not authorized")) {
+          statusCode = StatusCodes.UNAUTHORIZED;
         }
         return res.status(statusCode).json({
           errors: errorMessages,
@@ -49,14 +51,22 @@ export const validateJobInput = withValidationErrors([
 ]);
 
 export const validateIdParam = withValidationErrors([
-  param("id").custom(async (value) => {
+  param("id").custom(async (value, { req }) => {
+    const typedReq = req as Request & {
+      user: { userId: string; role: string };
+    };
     const isValidId = mongoose.Types.ObjectId.isValid(value);
     if (!isValidId) {
-      return Promise.reject("invalid mongodb id");
+      throw new Error("invalid mongodb id");
     }
     const job = await Job.findById(value);
     if (!job) {
-      return Promise.reject("no job found with this id " + value);
+      throw new Error("no job found with this id " + value);
+    }
+    const isAdmin = typedReq.user.role === "admin";
+    const isOwner = (typedReq.user.userId = job.createdBy.toString());
+    if (!isAdmin && !isOwner) {
+      throw new Error("not authorized to access this route");
     }
   }),
 ]);
@@ -73,7 +83,7 @@ export const validateRegisterInput = withValidationErrors([
       const user = await User.findOne({ email: value });
       if (user) {
         console.log("found user in database", user);
-        return Promise.reject("Email already exists");
+        throw new Error("Email already exists");
       }
     }),
   body("password")

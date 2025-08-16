@@ -13,3 +13,8 @@ export const createJWT = (payload: Record<string, string>) => {
   const token = jwt.sign(payload, process.env.JWT_SECRET as Secret, options);
   return token;
 };
+
+export const verifyJWT = (token: string) => {
+  const decoded = jwt.verify(token, process.env.JWT_SECRET as Secret);
+  return decoded;
+};
