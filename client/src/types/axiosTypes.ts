@@ -3,4 +3,8 @@ type ErrorResponse = {
   errors?: string[];
   message?: string;
 };
-export type { ErrorResponse };
+
+type SuccessResponse<P, T extends string> = {
+  success: true;
+} & { [prop in T]: P };
+export type { ErrorResponse, SuccessResponse };

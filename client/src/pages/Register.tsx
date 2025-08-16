@@ -61,7 +61,7 @@ const Register = () => {
           type="password"
           name="password"
           labelText="Password"
-          defaultValue={"admin123"}
+          defaultValue={"example123"}
         />
 
         <button disabled={isSubmitting} type="submit" className="btn btn-block">
