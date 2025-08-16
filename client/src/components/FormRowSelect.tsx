@@ -1,4 +1,4 @@
-import React, { type ComponentPropsWithoutRef, type FC } from "react";
+import { type ComponentPropsWithoutRef, type FC } from "react";
 type SelectProp = {
   name: string;
   labelText?: string;

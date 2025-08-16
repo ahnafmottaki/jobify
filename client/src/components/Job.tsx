@@ -7,6 +7,7 @@ import JobInfo from "./JobInfo";
 import { Form, Link } from "react-router";
 
 const Job: FC<JobType> = ({
+  _id,
   position,
   company,
   jobLocation,
@@ -15,7 +16,6 @@ const Job: FC<JobType> = ({
   createdAt,
 }) => {
   const date = dayjs(createdAt).format("MMM DD, YYYY");
-  console.log(date);
   return (
     <Wrapper>
       <header>
@@ -33,7 +33,7 @@ const Job: FC<JobType> = ({
           <div className={`status ${jobStatus}`}>{jobStatus}</div>
         </div>
         <footer className="actions">
-          <Link className="btn edit-btn" to={"/"}>
+          <Link className="btn edit-btn" to={"../edit-job/" + _id}>
             Edit
           </Link>
           <Form>
