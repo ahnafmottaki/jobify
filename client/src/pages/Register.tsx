@@ -10,8 +10,7 @@ import {
 } from "react-router";
 import { FormRow } from "../components";
 import customFetch from "../utils/customFetch";
-import { isAxiosError } from "axios";
-import { type ErrorResponse } from "../types/axiosTypes";
+import { showErrors } from "../utils/axiosFns";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
@@ -21,14 +20,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     toast.success("Registration successful");
     return redirect("/login");
   } catch (error) {
-    if (isAxiosError<ErrorResponse>(error)) {
-      const responseData = error.response?.data;
-      if (responseData) {
-        toast.error(responseData.errors[0] || "Something went wrong");
-      }
-    }
-
-    return error;
+    showErrors(error);
   }
 };
 

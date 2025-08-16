@@ -1,5 +1,6 @@
 type ErrorResponse = {
   success: false;
-  errors: string[];
+  errors?: string[];
+  message?: string;
 };
 export type { ErrorResponse };

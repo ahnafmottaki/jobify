@@ -1,4 +1,9 @@
-import { Outlet } from "react-router";
+import {
+  Outlet,
+  useLoaderData,
+  type LoaderFunction,
+  type LoaderFunctionArgs,
+} from "react-router";
 import Wrapper from "../assets/wrappers/Dashboard";
 import { BigSideBar, Navbar, SmallSidebar } from "../components";
 import { createContext, useContext, useState } from "react";
@@ -22,7 +27,13 @@ const DashboardContext = createContext<DashboardContextProps>({
   logoutUser() {},
 });
 
+export const loader: LoaderFunction = ({}: LoaderFunctionArgs) => {
+  return "hello world";
+};
+
 const DashboardLayout = () => {
+  const data = useLoaderData();
+  console.log(data);
   //temp
   const user = { name: "john" };
   const [showSidebar, setShowSidebar] = useState(false);
