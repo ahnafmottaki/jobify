@@ -1,6 +1,8 @@
 import {
+  Form,
   redirect,
   useLoaderData,
+  useNavigation,
   useParams,
   type ActionFunction,
   type ActionFunctionArgs,
@@ -27,12 +29,71 @@ export const loader: LoaderFunction = async ({
     return redirect("/dashboard/all-jobs");
   }
 };
-export const action: ActionFunction = ({}: ActionFunctionArgs) => {};
+export const action: ActionFunction = async ({
+  request,
+  params,
+}: ActionFunctionArgs) => {
+  const formData = await request.formData();
+  const data = Object.fromEntries(formData);
+  try {
+    await customFetch.patch("/jobs/" + params.id, data);
+    toast.success("Job edited successfully");
+    return redirect("/dashboard/all-jobs");
+  } catch (error) {
+    showErrors(error);
+  }
+};
 
 const EditJob = () => {
+  const navigation = useNavigation();
+  const isSubmitting = navigation.state === "submitting";
   const { job } = useLoaderData<SuccessResponse<Job, "job">>();
-  console.log(job);
-  return <div>EditJob</div>;
+  return (
+    <Wrapper>
+      <Form method="post" className="form">
+        <h4 className="form-title">Edit Job</h4>
+        <div className="form-center">
+          <FormRow
+            type="text"
+            name="position"
+            labelText="Position"
+            defaultValue={job.position}
+          />
+          <FormRow
+            type="text"
+            name="company"
+            labelText="Company"
+            defaultValue={job.company}
+          />
+          <FormRow
+            type="text"
+            name="jobLocation"
+            labelText="Job Location"
+            defaultValue={job.jobLocation}
+          />
+          <FormRowSelect
+            name="jobStatus"
+            labelText="Job Status"
+            list={JOB_STATUS}
+            defaultValue={job.jobStatus}
+          />
+          <FormRowSelect
+            name="jobType"
+            labelText="Job Type"
+            list={JOB_TYPE}
+            defaultValue={job.jobType}
+          />
+          <button
+            type="submit"
+            className="btn btn-block form-btn"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Submitting..." : "Submit"}
+          </button>
+        </div>
+      </Form>
+    </Wrapper>
+  );
 };
 
 export default EditJob;
