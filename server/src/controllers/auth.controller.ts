@@ -2,7 +2,8 @@ import asyncHandler from "../utils/asyncHandler";
 import { StatusCodes } from "http-status-codes";
 import User, { type UserProp } from "../models/user.model";
 import { ResSuccessProp } from "../types/reqResTypes";
-import bcrypt from "bcryptjs";
+import { comparePassword, hashPassword } from "../utils/passwordUtils";
+import AppError from "../utils/AppError";
 
 export const register = asyncHandler<
   any,
@@ -13,15 +14,26 @@ export const register = asyncHandler<
   if (isFirstDocument === 0) {
     req.body.role = "admin";
   }
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(req.body.password, salt);
-  req.body.password = hashedPassword;
+
+  req.body.password = await hashPassword(req.body.password);
   await User.create(req.body);
   res
     .status(StatusCodes.CREATED)
     .json({ success: true, message: "user created" });
 });
 
-export const login = asyncHandler(async (req, res) => {
-  res.send("login");
-});
+type LoginBody = { email: string; password: string };
+export const login = asyncHandler<any, any, LoginBody>(
+  async (req, res, next) => {
+    const user = await User.findOne({ email: req.body.email });
+    const isValidUser =
+      user && (await comparePassword(req.body.password, user.password));
+    if (!isValidUser) {
+      return next(
+        new AppError(StatusCodes.UNAUTHORIZED, "invalid credentials")
+      );
+    }
+
+    res.send("login");
+  }
+);
