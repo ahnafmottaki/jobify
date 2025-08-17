@@ -18,7 +18,9 @@ export const authenticateUser = (
       userId: string;
       role: string;
     };
-    req.user = data;
+    const testUser = data.userId === "68a1983bbb394c633f38450d";
+    req.user = { ...data, testUser };
+
     next();
   } catch (err) {
     return next(
@@ -39,4 +41,15 @@ export const authorizePermissions = (...roles: string[]) => {
     }
     next();
   };
+};
+
+export const checkForTestUser = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (req.user?.testUser) {
+    return next(new AppError(StatusCodes.BAD_REQUEST, "Demo user. Read Only "));
+  }
+  next();
 };

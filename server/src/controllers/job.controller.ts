@@ -53,3 +53,7 @@ export const deleteJob = asyncHandler<
   await Job.findByIdAndDelete(req.params.id);
   res.status(StatusCodes.OK).json({ success: true, message: "job deleted" });
 });
+
+export const showStats = asyncHandler((req, res, next) => {
+  res.send({ message: "heelo mango" });
+});
