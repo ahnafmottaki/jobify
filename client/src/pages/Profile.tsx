@@ -1,13 +1,12 @@
 import {
   Form,
-  useNavigation,
   useOutletContext,
   type ActionFunction,
   type ActionFunctionArgs,
 } from "react-router";
 import type { User } from "../types/userTypes";
 import Wrapper from "../assets/wrappers/DashboardFormPage";
-import { FormRow } from "../components";
+import { FormRow, SubmitBtn } from "../components";
 import { toast } from "react-toastify";
 import customFetch from "../utils/customFetch";
 import { showErrors } from "../utils/axiosFns";
@@ -33,8 +32,6 @@ export const action: ActionFunction = async ({
 const Profile = () => {
   const { user } = useOutletContext<{ user: User }>();
   const { name, lastName, email, location } = user;
-  const navigation = useNavigation();
-  const isSubmitting = navigation.state === "submitting";
   return (
     <Wrapper>
       <Form method="post" className="form" encType="multipart/form-data">
@@ -76,13 +73,7 @@ const Profile = () => {
             defaultValue={location}
             labelText="Location"
           />
-          <button
-            type="submit"
-            className="btn btn-block form-btn"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Submitting..." : "Submit"}
-          </button>
+          <SubmitBtn formBtn />
         </div>
       </Form>
     </Wrapper>
