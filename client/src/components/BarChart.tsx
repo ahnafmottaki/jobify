@@ -1,5 +1,30 @@
-const BarChart = () => {
-  return <div>BarChart</div>;
+import type { JobStatResProp } from "../types/statsTypes";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+
+type BarChartProp = {
+  data: JobStatResProp["monthlyApplications"];
 };
 
-export default BarChart;
+const BarChartComponent = ({ data }: BarChartProp) => {
+  return (
+    <ResponsiveContainer width={"100%"} height={300}>
+      <BarChart data={data} margin={{ top: 50 }}>
+        <CartesianGrid strokeDasharray={"3 3"} />
+        <XAxis dataKey={"date"} />
+        <YAxis allowDecimals={false} />
+        <Tooltip />
+        <Bar dataKey={"count"} fill="#2cb1bc" barSize={75} />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+};
+
+export default BarChartComponent;

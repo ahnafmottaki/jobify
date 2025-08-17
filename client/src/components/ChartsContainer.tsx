@@ -3,6 +3,7 @@ import AreaChart from "./Areachart";
 import Wrapper from "../assets/wrappers/ChartsContainer";
 import type { JobStatResProp } from "../types/statsTypes";
 import { useState } from "react";
+
 type ChartsContainerProp = Omit<JobStatResProp, "defaultStats">;
 
 const ChartsContainer = ({ monthlyApplications }: ChartsContainerProp) => {
