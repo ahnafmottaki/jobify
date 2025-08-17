@@ -17,8 +17,8 @@ const errorMiddleware = (
   if (isAppError(error)) {
     statusCode = error.status;
     message = error.message;
-    console.log(error);
   }
+  console.log(error);
   res.status(statusCode).json({
     success: false,
     message,

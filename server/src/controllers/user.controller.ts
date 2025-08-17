@@ -39,9 +39,7 @@ export const updateUser = asyncHandler<
   ResSuccessProp<string, "message">,
   UserProp
 >(async (req, res, next) => {
-  const updatedUser = await User.findByIdAndUpdate(
-    req.user?.userId,
-    validationResult(req)
-  );
+  console.log(req.file);
+  await User.findByIdAndUpdate(req.user?.userId, validationResult(req));
   res.status(StatusCodes.OK).json({ success: true, message: "update  user" });
 });
