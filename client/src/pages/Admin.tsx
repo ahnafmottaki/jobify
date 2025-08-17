@@ -9,6 +9,7 @@ import {
 import customFetch from "../utils/customFetch";
 import { toast } from "react-toastify";
 import type { SuccessResponse } from "../types/axiosTypes";
+import { StatItem } from "../components";
 
 export const loader: LoaderFunction = async ({}: LoaderFunctionArgs) => {
   try {
@@ -21,12 +22,24 @@ export const loader: LoaderFunction = async ({}: LoaderFunctionArgs) => {
 };
 
 const Admin = () => {
-  const data =
+  const { stats } =
     useLoaderData<SuccessResponse<{ users: string; jobs: string }, "stats">>();
-  console.log(data);
   return (
     <Wrapper>
-      <h1>Admin page</h1>
+      <StatItem
+        title="current users"
+        count={stats.users}
+        color="#e9b949"
+        bcg="#fcefc7"
+        icon={<FaSuitcaseRolling />}
+      />
+      <StatItem
+        title="total jobs"
+        count={stats.jobs}
+        color="#647acb"
+        bcg="#e0e8f9"
+        icon={<FaCalendarCheck />}
+      />
     </Wrapper>
   );
 };
