@@ -1,14 +1,13 @@
 import { Form, Link, useSubmit } from "react-router";
 import Wrapper from "../assets/wrappers/DashboardFormPage";
-import { FormRowSelect, FormRow, SubmitBtn } from "../components";
+import { FormRowSelect, FormRow } from "../components";
 import { JOB_SORT_BY, JOB_STATUS, JOB_TYPE } from "../utils/constants";
 import type { FormEvent } from "react";
 import { useAllJobsContext } from "../pages/AllJobs";
 
 const SearchContainer = () => {
   const submit = useSubmit();
-  const { search, jobStatus, jobType, sort } = useAllJobsContext();
-  console.log();
+  const jobContext = useAllJobsContext();
   function onChangeHandler(e: FormEvent<HTMLInputElement | HTMLSelectElement>) {
     submit(e.currentTarget.form);
   }
@@ -34,28 +33,28 @@ const SearchContainer = () => {
             type="search"
             labelText="Search"
             name="search"
-            defaultValue={search}
+            defaultValue={jobContext?.search}
             onChange={debounce((form) => submit(form))}
           />
           <FormRowSelect
             name="jobStatus"
             labelText="Job Status"
             list={{ All: "all", ...JOB_STATUS }}
-            defaultValue={jobStatus}
+            defaultValue={jobContext.jobStatus}
             onChange={onChangeHandler}
           />
           <FormRowSelect
             name="jobType"
             labelText="Job Type"
             list={{ All: "all", ...JOB_TYPE }}
-            defaultValue={jobType}
+            defaultValue={jobContext.jobType}
             onChange={onChangeHandler}
           />
           <FormRowSelect
             name="sort"
             labelText="Sort"
             list={JOB_SORT_BY}
-            defaultValue={sort}
+            defaultValue={jobContext.sort}
             onChange={onChangeHandler}
           />
           <Link to={"/dashboard/all-jobs"} className=" btn form-btn delete-btn">

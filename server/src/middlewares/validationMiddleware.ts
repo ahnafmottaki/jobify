@@ -84,7 +84,6 @@ export const validateRegisterInput = withValidationErrors([
     .custom(async (value: string) => {
       const user = await User.findOne({ email: value });
       if (user) {
-        console.log("found user in database", user);
         throw new Error("Email already exists");
       }
     }),
@@ -119,7 +118,6 @@ export const validateUpdateUserInput = withValidationErrors([
       const typedReq = req as TypedReq;
       const user = await User.findOne({ email: value });
       if (user && user._id.toString() !== typedReq.user.userId) {
-        console.log("found user in database", user);
         throw new Error("Email already exists");
       }
     }),

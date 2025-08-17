@@ -43,7 +43,7 @@ export const loader: LoaderFunction = async ({}: LoaderFunctionArgs) => {
 
 const DashboardLayout = () => {
   const { user } = useLoaderData<SuccessResponse<User, "user">>();
-  console.log(user);
+
   //temp
   // const user = { name: "john" };
   const [showSidebar, setShowSidebar] = useState(false);

@@ -1,15 +1,15 @@
+// server.ts (or entry file)
 import mongoose from "mongoose";
 import app from "./app";
 
-const port = process.env.PORT || 5000;
-(async function () {
+(async function connectDB() {
   try {
     await mongoose.connect(process.env.MONGO_URL!);
-    app.listen(port, () => {
-      console.log("server started listening at " + port);
-    });
   } catch (err) {
-    console.log(err);
+    console.error("❌ MongoDB connection error:", err);
     process.exit(1);
   }
 })();
+
+app.listen(process.env.PORT);
+console.log("✅ Connected to MongoDB");

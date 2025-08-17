@@ -5,8 +5,6 @@ import { ResSuccessProp } from "../types/reqResTypes";
 import { comparePassword, hashPassword } from "../utils/passwordUtils";
 import AppError from "../utils/AppError";
 import { createJWT } from "../utils/tokenUtils";
-import jobModel from "../models/job.model";
-("");
 
 export const register = asyncHandler<
   any,
@@ -42,7 +40,8 @@ export const login = asyncHandler<
   res.cookie("token", token, {
     httpOnly: true,
     expires: new Date(Date.now() + oneDay),
-    secure: process.env.NODE_ENV === "production",
+    secure: true,
+    sameSite: "none",
   });
 
   res.status(StatusCodes.OK).json({ success: true, message: "user logged in" });
@@ -53,7 +52,8 @@ export const logout = asyncHandler<any, ResSuccessProp<string, "message">>(
     res.cookie("token", "logout", {
       httpOnly: true,
       expires: new Date(Date.now()),
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
+      sameSite: "none",
     });
     res.status(StatusCodes.OK).json({
       success: true,

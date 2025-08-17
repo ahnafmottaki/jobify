@@ -5,7 +5,6 @@ import {
 } from "react-router";
 import { ChartsContainer, StatsContainer } from "../components";
 import customFetch from "../utils/customFetch";
-import { showErrors } from "../utils/axiosFns";
 import type { JobStatResProp } from "../types/statsTypes";
 
 export const loader: LoaderFunction = async ({}: LoaderFunctionArgs) => {

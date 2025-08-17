@@ -18,7 +18,6 @@ const errorMiddleware = (
     statusCode = error.status;
     message = error.message;
   }
-  console.log(error);
   res.status(statusCode).json({
     success: false,
     message,

@@ -6,9 +6,7 @@ import {
 import customFetch from "../utils/customFetch";
 import { showErrors } from "../utils/axiosFns";
 import { JobsContainer, SearchContainer } from "../components";
-import type { Job } from "../types/jobType";
 import { createContext, useContext } from "react";
-import { JOB_STATUS, JOB_TYPE } from "../utils/constants";
 import type { AllJobResProp } from "../types/reqResTypes";
 
 export const loader: LoaderFunction = async ({

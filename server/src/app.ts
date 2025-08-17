@@ -23,9 +23,15 @@ const app = express();
 
 // morgan middleware use in development mode
 if (process.env.NODE_ENV === "development") {
-  console.log("morgan middleware added");
   app.use(morgan("dev"));
 }
+
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "Health check successful",
+  });
+});
 
 app.use(
   "/api/v1/photos/uploads",
@@ -34,7 +40,7 @@ app.use(
 
 app.use(
   cors({
-    origin: [process.env.FRONTEND_ORIGIN as string],
+    origin: ["https://full-stack-jobify.netlify.app"],
     credentials: true,
   })
 );
