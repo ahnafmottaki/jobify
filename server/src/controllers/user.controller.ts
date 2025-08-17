@@ -1,10 +1,13 @@
 import User, { UserProp } from "../models/user.model";
 import Job from "../models/job.model";
 import { asyncHandler } from "../utils/asyncHandler";
-import { StatusCodes } from "http-status-codes";
+import { getReasonPhrase, StatusCodes } from "http-status-codes";
 import { ResSuccessProp } from "../types/reqResTypes";
 import AppError from "../utils/AppError";
 import { validationResult } from "express-validator";
+import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
+import { promises as fs } from "fs";
+import { response } from "express";
 
 export const getCurrentUser = asyncHandler<any, ResSuccessProp<object, "user">>(
   async (req, res, next) => {
@@ -34,12 +37,22 @@ export const getApplicationStats = asyncHandler<
   });
 });
 
-export const updateUser = asyncHandler<
-  any,
-  ResSuccessProp<string, "message">,
-  UserProp
->(async (req, res, next) => {
-  console.log(req.file);
-  await User.findByIdAndUpdate(req.user?.userId, validationResult(req));
-  res.status(StatusCodes.OK).json({ success: true, message: "update  user" });
-});
+export const updateUser = asyncHandler<any, ResSuccessProp<string, "message">>(
+  async (req, res, next) => {
+    const data: any = { ...validationResult(req) };
+    if (req.file) {
+      const response = await cloudinary.uploader.upload(req.file.path, {
+        folder: "jobify_uploads",
+      });
+      await fs.unlink(req.file.path);
+      data.avatar = response.secure_url;
+      data.avatarPublicId = response.public_id;
+    }
+
+    const updateUser = await User.findByIdAndUpdate(req.user?.userId, data);
+    if (req.file && updateUser?.avatarPublicId) {
+      await cloudinary.uploader.destroy(updateUser.avatarPublicId);
+    }
+    res.status(StatusCodes.OK).json({ success: true, message: "update  user" });
+  }
+);

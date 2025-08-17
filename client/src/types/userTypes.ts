@@ -7,6 +7,8 @@ interface User {
   role: string;
   updatedAt: string;
   _id: string;
+  avatar?: string;
+  avatarPublicId?: string;
 }
 
 export type { User };
