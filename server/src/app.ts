@@ -10,6 +10,7 @@ import notFoundMiddleware from "./middlewares/notFoundMiddleware";
 import { authenticateUser } from "./middlewares/authMiddleware";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import path from "path";
 
 const app = express();
 
@@ -18,6 +19,12 @@ if (process.env.NODE_ENV === "development") {
   console.log("morgan middleware added");
   app.use(morgan("dev"));
 }
+
+app.use(
+  "/api/v1/photos/uploads",
+  express.static(path.resolve(__dirname, "./public/uploads"))
+);
+
 app.use(
   cors({
     origin: [process.env.FRONTEND_ORIGIN as string],
