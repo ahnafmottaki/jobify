@@ -2,19 +2,56 @@ import Job, { type JobModel } from "../models/job.model";
 import { asyncHandler } from "../utils/asyncHandler";
 import type { ResSuccessProp } from "../types/reqResTypes";
 import { StatusCodes } from "http-status-codes";
-import mongoose, { Types } from "mongoose";
-import dayjs = require("dayjs");
+import mongoose, { FilterQuery, Query, SortOrder, Types } from "mongoose";
+import dayjs from "dayjs";
 
 type ParamIdProp = {
   id: string;
 };
 
+interface GetAllJobsQueryProp {
+  search?: string;
+  jobStatus?: string;
+  jobType?: string;
+  sort?: string;
+}
+
 export const getAllJobs = asyncHandler<
   any,
   any,
-  ResSuccessProp<JobModel[], "jobs">
+  ResSuccessProp<JobModel[], "jobs">,
+  GetAllJobsQueryProp
 >(async (req, res, next) => {
-  const jobs: JobModel[] = await Job.find({ createdBy: req.user?.userId });
+  const query: FilterQuery<JobModel> = { createdBy: req.user.userId };
+  const { search, jobStatus, jobType, sort } = req.query;
+  if (search) {
+    query.$or = [
+      { position: new RegExp(search, "i") },
+      {
+        company: new RegExp(search, "i"),
+      },
+    ];
+  }
+  if (jobStatus && jobStatus !== "all") {
+    query.jobStatus = jobStatus;
+  }
+
+  if (jobType && jobType !== "all") {
+    query.jobType = jobType;
+  }
+  const sortOptions = {
+    newest: "-createdAt",
+    oldest: "createdAt",
+    "a-z": "position",
+    "z-a": "-position",
+  } as const;
+  type SortKeyProp = (typeof sortOptions)[keyof typeof sortOptions];
+  let sortKey: SortKeyProp = sortOptions.newest;
+  if (sort && Object.keys(sortOptions).includes(sort)) {
+    sortKey = sortOptions[sort as keyof typeof sortOptions];
+  }
+
+  const jobs: JobModel[] = await Job.find(query).sort(sortKey);
   res.status(StatusCodes.OK).json({ success: true, jobs });
 });
 
