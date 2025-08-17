@@ -13,10 +13,10 @@ import { checkDefaultTheme } from "../App";
 import customFetch from "../utils/customFetch";
 import type { SuccessResponse } from "../types/axiosTypes";
 import { toast } from "react-toastify";
+import type { User } from "../types/userTypes";
 
-type User = { name: string } | null;
 type DashboardContextProps = {
-  user: User;
+  user: User | null;
   showSidebar: boolean;
   isDarkTheme: boolean;
   toggleDarkTheme: () => void;
