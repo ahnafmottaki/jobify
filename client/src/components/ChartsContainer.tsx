@@ -1,5 +1,5 @@
 import BarChart from "./BarChart";
-import AreaChart from "./Areachart";
+import AreaChart from "./AreaChart";
 import Wrapper from "../assets/wrappers/ChartsContainer";
 import type { JobStatResProp } from "../types/statsTypes";
 import { useState } from "react";
