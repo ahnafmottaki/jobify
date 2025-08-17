@@ -2,7 +2,8 @@ import Job, { type JobModel } from "../models/job.model";
 import { asyncHandler } from "../utils/asyncHandler";
 import type { ResSuccessProp } from "../types/reqResTypes";
 import { StatusCodes } from "http-status-codes";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
+import dayjs = require("dayjs");
 
 type ParamIdProp = {
   id: string;
@@ -54,6 +55,52 @@ export const deleteJob = asyncHandler<
   res.status(StatusCodes.OK).json({ success: true, message: "job deleted" });
 });
 
-export const showStats = asyncHandler((req, res, next) => {
-  res.send({ message: "heelo mango" });
+export const showStats = asyncHandler(async (req, res, next) => {
+  let stats = await Job.aggregate([
+    { $match: { createdBy: new mongoose.Types.ObjectId(req.user.userId) } },
+    { $group: { _id: "$jobStatus", count: { $sum: 1 } } },
+  ]);
+  stats = stats.reduce((acc, curr) => {
+    const { _id: title, count } = curr;
+    acc[title] = count;
+    return acc;
+  }, {});
+  const typedStats = stats as unknown as {
+    pending?: string;
+    interview?: string;
+    declined?: string;
+  };
+
+  let monthlyApplications = await Job.aggregate([
+    { $match: { createdBy: new mongoose.Types.ObjectId(req.user.userId) } },
+    {
+      $group: {
+        _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
+        count: { $sum: 1 },
+      },
+    },
+    { $sort: { "_id.year": -1, "_id.month": -1 } },
+    { $limit: 6 },
+  ]);
+  monthlyApplications = monthlyApplications
+    .map((item) => {
+      const {
+        _id: { year, month },
+        count,
+      } = item;
+      const date = dayjs()
+        .month(month - 1)
+        .year(year)
+        .format("MMM YY");
+      return { date, count };
+    })
+    .reverse();
+
+  const defaultStats = {
+    pending: typedStats?.pending || 0,
+    interview: typedStats?.interview || 0,
+    declined: typedStats?.declined || 0,
+  };
+
+  res.status(StatusCodes.OK).json({ defaultStats, monthlyApplications });
 });
