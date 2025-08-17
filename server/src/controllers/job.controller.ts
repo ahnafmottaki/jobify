@@ -1,25 +1,19 @@
 import Job, { type JobModel } from "../models/job.model";
 import { asyncHandler } from "../utils/asyncHandler";
-import type { ResSuccessProp } from "../types/reqResTypes";
+import type {
+  GetAllJobsQueryProp,
+  GetAllJobsResProp,
+  ParamIdProp,
+  ResSuccessProp,
+} from "../types/reqResTypes";
 import { StatusCodes } from "http-status-codes";
-import mongoose, { FilterQuery, Query, SortOrder, Types } from "mongoose";
+import mongoose, { FilterQuery, Types } from "mongoose";
 import dayjs from "dayjs";
-
-type ParamIdProp = {
-  id: string;
-};
-
-interface GetAllJobsQueryProp {
-  search?: string;
-  jobStatus?: string;
-  jobType?: string;
-  sort?: string;
-}
 
 export const getAllJobs = asyncHandler<
   any,
+  GetAllJobsResProp,
   any,
-  ResSuccessProp<JobModel[], "jobs">,
   GetAllJobsQueryProp
 >(async (req, res, next) => {
   const query: FilterQuery<JobModel> = { createdBy: req.user.userId };
@@ -51,8 +45,20 @@ export const getAllJobs = asyncHandler<
     sortKey = sortOptions[sort as keyof typeof sortOptions];
   }
 
-  const jobs: JobModel[] = await Job.find(query).sort(sortKey);
-  res.status(StatusCodes.OK).json({ success: true, jobs });
+  const totalJobs = await Job.countDocuments(query);
+  const page = req.query.page ? Number(req.query.page) : 1;
+  const limit = req.query.limit ? Number(req.query.limit) : 10;
+  const skip = (page - 1) * limit;
+  const jobs: JobModel[] = await Job.find(query)
+    .sort(sortKey)
+    .skip(skip)
+    .limit(limit);
+  const numOfPages = Math.ceil(totalJobs / limit);
+  res.status(StatusCodes.OK).json({
+    success: true,
+    jobs,
+    pagination: { totalJobs, numOfPages, currentPage: page },
+  });
 });
 
 export const createJob = asyncHandler<
