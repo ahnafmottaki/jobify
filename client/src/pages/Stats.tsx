@@ -23,7 +23,7 @@ const Stats = () => {
     <>
       <StatsContainer defaultStats={defaultStats} />
       {monthlyApplications?.length > 1 && (
-        <ChartsContainer data={monthlyApplications} />
+        <ChartsContainer monthlyApplications={monthlyApplications} />
       )}
     </>
   );
